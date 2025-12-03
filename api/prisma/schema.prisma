@@ -1,0 +1,168 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+
+
+// 2. ENUMS (Strict Control)
+// We use Enums so we don't accidentally type "Done" instead of "COMPLETED"
+enum UserRole {
+  ADMIN      // Owner: Can manage billing, see all jobs
+  TECH       // Worker: Can only see their assigned jobs
+  DISPATCHER // Office: Can schedule, but not manage billing
+}
+
+enum JobStatus {
+  SCHEDULED   // On the calendar
+  IN_PROGRESS // Tech has started the timer
+  COMPLETED   // Work done, ready for invoice
+  CANCELED    // Did not happen
+}
+
+enum InvoiceStatus {
+  DRAFT       // Being built
+  SENT        // Emailed to customer
+  PAID        // Money received
+  OVERDUE     // Late
+}
+
+// 3. THE MODELS
+
+// THE TENANT (The "Company")
+// Every other table MUST have a 'tenantId' pointing here.
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String   // e.g., "Apex Plumbing"
+  slug      String   @unique // e.g., "apex-plumbing" (for subdomains)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  users     User[]
+  customers Customer[]
+  jobs      Job[]
+  invoices  Invoice[]
+  services  ServiceItem[] // The Catalog
+}
+
+// THE ACTORS (Users)
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Hashed password
+  name      String
+  role      UserRole @default(TECH)
+  avatarUrl String?  // Optional profile pic
+
+  // Multi-Tenancy
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Work Relationships
+  assignedJobs Job[] // Jobs this user is doing
+}
+
+// THE CLIENTS
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String
+  address   String
+  notes     String?  @db.Text // Long text for "Gate code is 1234"
+
+  // Multi-Tenancy
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  jobs      Job[]
+}
+
+// THE CORE WORK (Job)
+model Job {
+  id          String    @id @default(uuid())
+  title       String    // e.g., "Fix Leaking Sink"
+  description String?   @db.Text
+  
+  // Scheduling (Critical for Calendar)
+  start       DateTime  
+  end         DateTime
+  status      JobStatus @default(SCHEDULED)
+
+  // Relationships
+  customerId  String
+  customer    Customer  @relation(fields: [customerId], references: [id])
+
+  technicianId String?  // Optional: A job might not be assigned yet
+  technician   User?    @relation(fields: [technicianId], references: [id])
+
+  // Multi-Tenancy
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+
+  // Link to Invoice (One-to-One)
+  invoice     Invoice?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// THE CATALOG (Service Menu)
+// "Here are the things we sell and their current prices"
+model ServiceItem {
+  id          String   @id @default(uuid())
+  name        String   // e.g., "Labor Hour"
+  price       Decimal  @db.Decimal(10, 2) // ALWAYS use Decimal for money, never Float
+  
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+// THE MONEY (Invoice)
+model Invoice {
+  id          String        @id @default(uuid())
+  invoiceNumber Int         @default(autoincrement()) // Friendly ID like #1001
+  
+  // Calculations
+  subtotal    Decimal       @db.Decimal(10, 2)
+  taxRate     Decimal       @db.Decimal(5, 2) // e.g., 8.25
+  total       Decimal       @db.Decimal(10, 2)
+  status      InvoiceStatus @default(DRAFT)
+  
+  dueDate     DateTime
+  pdfUrl      String?       // Link to the generated PDF
+
+  // Relationships
+  jobId       String        @unique // Connects back to the Job
+  job         Job           @relation(fields: [jobId], references: [id])
+
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id])
+
+  // The Snapshot Data
+  lines       InvoiceLine[] 
+}
+
+// THE SNAPSHOT (Line Items)
+// "This specific invoice included these items at this specific price"
+model InvoiceLine {
+  id          String   @id @default(uuid())
+  description String   // e.g., "Labor Hour" (Copied from ServiceItem)
+  quantity    Int      @default(1)
+  unitPrice   Decimal  @db.Decimal(10, 2) // (Copied from ServiceItem)
+  
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
