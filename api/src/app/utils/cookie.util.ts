@@ -1,5 +1,5 @@
-import type { CookieOptions } from "express";
-import { ENV } from "../core/env.js";
+import type { CookieOptions, Response } from "express";
+import { ENV } from "../config/env.js";
 
 const baseCookieOptions: CookieOptions = {
   httpOnly: true,
@@ -8,18 +8,18 @@ const baseCookieOptions: CookieOptions = {
   path: "/",
 };
 
-export function buildAccessCookie(value: string) {
+export function buildAccessCookieDetails(value: string) {
   return {
     name: "access_token",
     value,
     options: {
       ...baseCookieOptions,
-      maxAge: 15 * 60 * 1000, // 15 mins
+      maxAge: ENV.ACCESS_TOKEN_EXPIRES_IN * 60 * 1000, // 15 mins
     } as CookieOptions,
   };
 }
 
-export function buildRefreshCookie(value: string) {
+export function buildRefreshCookieDetails(value: string) {
   return {
     name: "refresh_token",
     value,
@@ -30,8 +30,33 @@ export function buildRefreshCookie(value: string) {
   };
 }
 
-export function clearAuthCookies() {
-  return [
+const setCookie = (
+  res: Response,
+  {
+    name,
+    value,
+    options,
+  }: { name: string; value: string; options: CookieOptions }
+) => {
+  res.cookie(name, value, options);
+};
+
+export const setAuthCookies = (
+  res: Response,
+  {
+    access_token,
+    refresh_token,
+  }: { access_token: string; refresh_token: string }
+) => {
+  const accessCookieDetails = buildAccessCookieDetails(access_token);
+  const refreshCookieDetails = buildRefreshCookieDetails(refresh_token);
+
+  setCookie(res, accessCookieDetails);
+  setCookie(res, refreshCookieDetails);
+};
+
+export function clearAuthCookies(res: Response) {
+  [
     {
       name: "access_token",
       options: { ...baseCookieOptions, expires: new Date(0) },
@@ -40,5 +65,7 @@ export function clearAuthCookies() {
       name: "refresh_token",
       options: { ...baseCookieOptions, expires: new Date(0) },
     },
-  ];
+  ].forEach((detail) => {
+    res.clearCookie(detail.name, detail.options);
+  });
 }

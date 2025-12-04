@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { jwtUtil } from "../utils/jwt.util.js";
-import { AppError } from "../core/appError.js";
+import { AppError } from "../config/appError.js";
 
 export interface AuthUser extends Request {
   user?: {
@@ -12,7 +12,7 @@ export interface AuthUser extends Request {
 
 export function requireAuth(req: AuthUser, res: Response, next: NextFunction) {
   try {
-    const token = req.cookies?.access_token;
+    const token = req.cookies?.tradeGrid_access_token;
     if (!token) {
       throw new AppError(401, "Not authenticated");
     }

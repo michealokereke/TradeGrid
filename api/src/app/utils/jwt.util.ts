@@ -1,9 +1,9 @@
 import type { SignOptions, JwtPayload } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
-import { ENV } from "../core/env.js";
+import { ENV } from "../config/env.js";
 
 const sign = (payload: object, expiresIn: string | number): string => {
-  const options: SignOptions = { expiresIn: expiresIn as any }; // 👈 explicit cast here
+  const options: SignOptions = { expiresIn: expiresIn as any };
   return jwt.sign(payload, ENV.JWT_SECRET as jwt.Secret, options);
 };
 
@@ -13,7 +13,7 @@ const verify = (token: string): string | JwtPayload => {
 
 export const jwtUtil = {
   signAccessToken(payload: object) {
-    return sign(payload, ENV.ACCESS_TOKEN_EXPIRES_IN || "15m");
+    return sign(payload, `${ENV.REFRESH_TOKEN_EXPIRES_DAYS || 15}d`);
   },
 
   signRefreshToken(payload: object) {
