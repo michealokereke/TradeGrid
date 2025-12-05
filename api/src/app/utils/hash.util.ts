@@ -12,4 +12,7 @@ export const hashUtil = {
   hashToken(token: string) {
     return crypto.createHash("sha256").update(token).digest("hex");
   },
+  generateToken() {
+    return crypto.randomBytes(32).toString("hex");
+  },
 };

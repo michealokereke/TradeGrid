@@ -10,7 +10,7 @@ const baseCookieOptions: CookieOptions = {
 
 export function buildAccessCookieDetails(value: string) {
   return {
-    name: "access_token",
+    name: ENV.ACCESS_COOKIE_NAME,
     value,
     options: {
       ...baseCookieOptions,
@@ -21,7 +21,7 @@ export function buildAccessCookieDetails(value: string) {
 
 export function buildRefreshCookieDetails(value: string) {
   return {
-    name: "refresh_token",
+    name: ENV.REFRESH_COOKIE_NAME,
     value,
     options: {
       ...baseCookieOptions,
@@ -58,11 +58,11 @@ export const setAuthCookies = (
 export function clearAuthCookies(res: Response) {
   [
     {
-      name: "access_token",
+      name: ENV.ACCESS_COOKIE_NAME,
       options: { ...baseCookieOptions, expires: new Date(0) },
     },
     {
-      name: "refresh_token",
+      name: ENV.REFRESH_COOKIE_NAME,
       options: { ...baseCookieOptions, expires: new Date(0) },
     },
   ].forEach((detail) => {

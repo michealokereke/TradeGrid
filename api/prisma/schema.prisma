@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client"
-  // output   = "../generated/prisma"
+ output   = "../src/generated"
 }
 
 datasource db {
@@ -14,168 +14,179 @@ datasource db {
 }
 
 
-
-
-// 2. ENUMS (Strict Control)
-// We use Enums so we don't accidentally type "Done" instead of "COMPLETED"
 enum UserRole {
-  ADMIN      // Owner: Can manage billing, see all jobs
-  TECH       // Worker: Can only see their assigned jobs
-  DISPATCHER // Office: Can schedule, but not manage billing
+  ADMIN     
+  TECH       
+  DISPATCHER 
 }
 
 enum JobStatus {
-  SCHEDULED   // On the calendar
-  IN_PROGRESS // Tech has started the timer
-  COMPLETED   // Work done, ready for invoice
-  CANCELED    // Did not happen
+  SCHEDULED  
+  IN_PROGRESS 
+  COMPLETED   
+  CANCELED    
 }
 
 enum InvoiceStatus {
-  DRAFT       // Being built
-  SENT        // Emailed to customer
-  PAID        // Money received
-  OVERDUE     // Late
+  DRAFT      
+  SENT      
+  PAID        
+  OVERDUE    
 }
 
-// 3. THE MODELS
 
-// THE TENANT (The "Company")
-// Every other table MUST have a 'tenantId' pointing here.
+
+
+
 model Tenant {
   id        String   @id @default(uuid())
-  name      String   // e.g., "Apex Plumbing"
-  slug      String   @unique // e.g., "apex-plumbing" (for subdomains)
+  name      String  
+  slug      String   @unique 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relationships
+  
   users     User[]
   customers Customer[]
   jobs      Job[]
   invoices  Invoice[]
-  services  ServiceItem[] // The Catalog
-  ivites    Invitation[]
+  services  ServiceItem[] 
+  invitations Invitation[]
 }
 
-// THE ACTORS (Users)
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String   // Hashed password
+  password  String  
   name      String
   role      UserRole @default(TECH)
-  avatarUrl String?  // Optional profile pic
+  avatarUrl String? 
 
-  // Multi-Tenancy
+  
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  // Work Relationships
-  assignedJobs Job[] // Jobs this user is doing
+  
+  refreshTokens RefreshToken[]
+  assignedJobs Job[] 
 }
 
 
-model Invitation {
-  id        String   @id @default(uuid()) @db.Uuid
-  email     String
-  token     String   @unique
-  role      UserRole
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  expiresAt DateTime
-}
-
-// THE CLIENTS
 model Customer {
   id        String   @id @default(uuid())
   name      String
   email     String
   phone     String
   address   String
-  notes     String?  @db.Text // Long text for "Gate code is 1234"
+  notes     String?  @db.Text
 
-  // Multi-Tenancy
+  
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
 
   jobs      Job[]
 }
 
-// THE CORE WORK (Job)
+
 model Job {
   id          String    @id @default(uuid())
-  title       String    // e.g., "Fix Leaking Sink"
+  title       String  
   description String?   @db.Text
   
-  // Scheduling (Critical for Calendar)
+ 
   start       DateTime  
   end         DateTime
   status      JobStatus @default(SCHEDULED)
 
-  // Relationships
+ 
   customerId  String
   customer    Customer  @relation(fields: [customerId], references: [id])
 
-  technicianId String?  // Optional: A job might not be assigned yet
+  technicianId String?  
   technician   User?    @relation(fields: [technicianId], references: [id])
 
-  // Multi-Tenancy
+  
   tenantId    String
   tenant      Tenant    @relation(fields: [tenantId], references: [id])
 
-  // Link to Invoice (One-to-One)
+
   invoice     Invoice?
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
 
-// THE CATALOG (Service Menu)
-// "Here are the things we sell and their current prices"
+
 model ServiceItem {
   id          String   @id @default(uuid())
-  name        String   // e.g., "Labor Hour"
-  price       Decimal  @db.Decimal(10, 2) // ALWAYS use Decimal for money, never Float
+  name        String   
+  price       Decimal  @db.Decimal(10, 2) 
   
   tenantId    String
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
 }
 
-// THE MONEY (Invoice)
+
 model Invoice {
   id          String        @id @default(uuid())
-  invoiceNumber Int         @default(autoincrement()) // Friendly ID like #1001
+  invoiceNumber Int         @default(autoincrement()) 
   
-  // Calculations
+
   subtotal    Decimal       @db.Decimal(10, 2)
-  taxRate     Decimal       @db.Decimal(5, 2) // e.g., 8.25
+  taxRate     Decimal       @db.Decimal(5, 2) 
   total       Decimal       @db.Decimal(10, 2)
   status      InvoiceStatus @default(DRAFT)
   
   dueDate     DateTime
-  pdfUrl      String?       // Link to the generated PDF
+  pdfUrl      String?      
 
-  // Relationships
-  jobId       String        @unique // Connects back to the Job
+  
+  jobId       String        @unique 
   job         Job           @relation(fields: [jobId], references: [id])
 
   tenantId    String
   tenant      Tenant        @relation(fields: [tenantId], references: [id])
 
-  // The Snapshot Data
   lines       InvoiceLine[] 
 }
 
-// THE SNAPSHOT (Line Items)
-// "This specific invoice included these items at this specific price"
+
 model InvoiceLine {
   id          String   @id @default(uuid())
-  description String   // e.g., "Labor Hour" (Copied from ServiceItem)
+  description String 
   quantity    Int      @default(1)
-  unitPrice   Decimal  @db.Decimal(10, 2) // (Copied from ServiceItem)
+  unitPrice   Decimal  @db.Decimal(10, 2) 
   
   invoiceId   String
   invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
+
+
+model Invitation {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  role      UserRole @default(TECH)
+  expiresAt DateTime
+  
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  userId      String
+  hashedTkn   String  @unique
+  expiresAt   DateTime
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([hashedTkn])
+}
+
+// Note: deviceInfo and ipAddress fields will be added later

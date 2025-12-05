@@ -1,12 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../generated/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { ENV } from "./env.js";
+// PrismaPg
 
-const prisma = new PrismaClient({
-  log:
-    process.env.NODE_ENV === "development"
-      ? ["query", "error", "warn"]
-      : ["error"],
-});
-
+const adapter = new PrismaPg({ connectionString: ENV.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 process.on("SIGINT", async () => {
   await prisma.$disconnect();
   console.log("🔌 Database connection closed gracefully");

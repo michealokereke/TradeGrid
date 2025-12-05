@@ -10,7 +10,7 @@ export interface AuthUser extends Request {
   };
 }
 
-export function requireAuth(req: AuthUser, res: Response, next: NextFunction) {
+export function requireAut(req: AuthUser, res: Response, next: NextFunction) {
   try {
     const token = req.cookies?.tradeGrid_access_token;
     if (!token) {

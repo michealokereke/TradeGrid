@@ -2,19 +2,25 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 import appRouter from "../api/router.js";
 import { errorHandler } from "../middlewares/error.middleware.js";
-
-// import authRoutes from "./routes/auth.routes";
-// import userRoutes from "./routes/user.routes";
+import { deserializeUser } from "../../middleware/auth.middleware.js";
 
 const app = express();
 
 app.use(helmet());
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Frontend URL
+    credentials: true,
+  })
+);
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(deserializeUser);
 
 app.get("/health", (req, res) => {
   res.json({
