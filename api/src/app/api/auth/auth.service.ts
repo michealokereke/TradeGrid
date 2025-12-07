@@ -1,16 +1,13 @@
 import prisma from "../../config/pridmaDB.js";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import type {
   RegisterTenantInput,
   LoginInput,
   InviteUserInput,
-  AcceptInviteInput,
 } from "./auth.schema.js";
 import { UserRole } from "../../../generated/enums.js";
 import type { AuthResponse, RefreshTknPayload, UserPayload } from "./types.js";
-import type { Prisma } from "../../../generated/client.js";
 import { jwtUtil } from "../../utils/jwt.util.js";
 import { buildRefreshTokenDetails } from "./utils.js";
 import { hashUtil } from "../../utils/hash.util.js";
@@ -78,6 +75,8 @@ export const registerTenant = async (
       name: result.user.name,
       role: result.user.role,
       tenantId: result.user.tenantId,
+      tenantName: result.tenant.name,
+      slug: result.tenant.slug,
     },
     access_token,
     refresh_token,
@@ -138,6 +137,53 @@ export const login = async (input: LoginInput): Promise<AuthResponse> => {
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
+
+export const getMe = async (user?: UserPayload): Promise<AuthResponse> => {
+  if (!user) throw new AppError(400, "user id required");
+  const { tenantId, userId } = user;
+
+  const { sessionUser, tenant } = await prisma.$transaction(async function (
+    tx
+  ) {
+    const tenant = await tx.tenant.findUnique({
+      where: {
+        id: tenantId,
+      },
+
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+      },
+    });
+
+    const sessionUser = await tx.user.findUnique({
+      where: { id: userId },
+    });
+
+    return { sessionUser, tenant };
+  });
+
+  if (!sessionUser || !tenant)
+    throw new AppError(401, "user or tenant not found");
+
+  return {
+    user: {
+      id: sessionUser.id,
+      email: sessionUser.email,
+
+      name: sessionUser.name,
+      role: sessionUser.role,
+      tenantId: tenant.id,
+      tenantName: tenant.name,
+      slug: tenant.slug,
+    },
+  };
+};
+
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
 export const logout = async (refresh_token_payload: RefreshTknPayload) => {
   const hashedTkn = hashUtil.hashToken(refresh_token_payload.tkn);
 
@@ -151,6 +197,82 @@ export const logout = async (refresh_token_payload: RefreshTknPayload) => {
       revoked: true,
     },
   });
+};
+
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+
+export const refreshAccessToken = async (
+  refresh_token_payload: RefreshTknPayload
+): Promise<AuthResponse> => {
+  const { userId, tkn } = refresh_token_payload;
+  const hashedTkn = hashUtil.hashToken(tkn);
+
+  const oldToken = await prisma.refreshToken.findUnique({
+    where: { hashedTkn },
+  });
+
+  if (!oldToken) {
+    throw new AppError(401, "Invalid refresh token");
+  }
+
+  // Reuse Detection
+  if (oldToken.revoked) {
+    // Security: Revoke all tokens for this user
+    await prisma.refreshToken.updateMany({
+      where: { userId },
+      data: { revoked: true },
+    });
+    throw new AppError(401, "Refresh token reused - Security Alert");
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new AppError(401, "User not found");
+
+  const {
+    tkn: newTkn,
+    hashedTkn: newHashedTkn,
+    expiresAt,
+  } = buildRefreshTokenDetails();
+
+  // Rotate: Revoke old, create new
+  await prisma.$transaction([
+    prisma.refreshToken.update({
+      where: { id: oldToken.id },
+      data: { revoked: true },
+    }),
+    prisma.refreshToken.create({
+      data: {
+        userId,
+        hashedTkn: newHashedTkn,
+        expiresAt: expiresAt.toJSDate(),
+      },
+    }),
+  ]);
+
+  const access_token = jwtUtil.signAccessToken({
+    userId: user.id,
+    tenantId: user.tenantId,
+    role: user.role,
+  });
+
+  const refresh_token = jwtUtil.signRefreshToken({
+    tkn: newTkn,
+    userId: user.id,
+  });
+
+  return {
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      tenantId: user.tenantId,
+    },
+    access_token,
+    refresh_token,
+  };
 };
 
 ////////////////////////////////////////////////////

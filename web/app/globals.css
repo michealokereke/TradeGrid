@@ -1,26 +1,338 @@
 @import "tailwindcss";
+/* @import "tw-animate-css"; */
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --radius: 0.625rem;
+
+  /* Main background — app pages, dashboards, canvas */
+  --background: oklch(0.988 0.029 28.338);
+  /* Main text color — primary readable text for headings/body */
+  --foreground: oklch(0.209 0.031 228.931);
+
+  /* Surface / Card background — used for cards, panels, modals */
+  --card: oklch(1 0.031 28.875);
+  /* Card text (on card surfaces) — main readable color on card */
+  --card-foreground: oklch(0.209 0.031 228.931);
+
+  /* Popover background — dropdowns, menus */
+  --popover: oklch(1 0.031 28.875);
+  /* Popover text — text inside popovers/menus */
+  --popover-foreground: oklch(0.209 0.031 228.931);
+
+  /* Primary brand color — main CTA, primary buttons. Example: Primary button BG */
+  --primary: oklch(0.591 0.132 213.352);
+  /* Primary text on primary surfaces — e.g., white text on primary buttons */
+  --primary-foreground: oklch(1 0.031 28.875);
+
+  /* Secondary accent (lighter) — secondary buttons, subtle accents */
+  --secondary: oklch(0.905 0.027 210.349);
+  /* Secondary foreground — readable text for secondary surfaces */
+  --secondary-foreground: oklch(0.209 0.031 228.931);
+
+  /* Muted surface — low contrast surface (section backgrounds) */
+  --muted: oklch(0.97 0.027 27.168);
+  /* Muted text — lower-importance copy like helper text */
+  --muted-foreground: oklch(0.713 0.012 250.593);
+
+  /* Accent color — used for small accents, links, icons */
+  --accent: oklch(0.688 0.137 211.568);
+  /* Accent foreground — text/icon color used on accent backgrounds */
+  --accent-foreground: oklch(1 0.031 28.875);
+
+  /* Destructive / danger color — errors, destructive actions */
+  --destructive: oklch(0.637 0.205 16.556);
+  /* Border color — default border for inputs, dividers */
+  --border: oklch(0.936 0.023 23.996);
+  /* Input background — input / form surfaces */
+  --input: oklch(1 0.031 28.875);
+  /* Focus ring color — used for focus outlines (light mode) */
+  --ring: oklch(0.591 0.132 213.352 / 40%);
+
+  /* Chart palette 1 — recommended first color for charts */
+  --chart-1: oklch(0.757 0.123 209.733);
+  /* Chart palette 2 */
+  --chart-2: oklch(0.591 0.132 213.352);
+  /* Chart palette 3 */
+  --chart-3: oklch(0.726 0.092 131.106);
+  /* Chart palette 4 */
+  --chart-4: oklch(0.796 0.138 47.597);
+  /* Chart palette 5 */
+  --chart-5: oklch(0.608 0.14 246.25);
+
+  /* Sidebar background — sidebar panel BG */
+  --sidebar: oklch(0.97 0.027 27.168);
+  /* Sidebar text color */
+  --sidebar-foreground: oklch(0.209 0.031 228.931);
+  /* Sidebar primary accent — e.g., selected nav item BG */
+  --sidebar-primary: oklch(0.591 0.132 213.352);
+  /* Sidebar primary text (on primary colored sidebar items) */
+  --sidebar-primary-foreground: oklch(1 0.031 28.875);
+  /* Sidebar accent — small accents in sidebar */
+  --sidebar-accent: oklch(0.688 0.137 211.568);
+  /* Sidebar accent foreground */
+  --sidebar-accent-foreground: oklch(0.209 0.031 228.931);
+  /* Sidebar border / divider */
+  --sidebar-border: oklch(0.936 0.023 23.996);
+  /* Sidebar focus ring */
+  --sidebar-ring: oklch(0.591 0.132 213.352 / 25%);
+
+  /* -------------------- NEW / DETAILED TOKENS (light mode) -------------------- */
+  /* -------------------- NEW / DETAILED TOKENS (light mode) -------------------- */
+  /* -------------------- NEW / DETAILED TOKENS (light mode) -------------------- */
+
+  /* Background: base (alias) — main page background (copy of --background) */
+  --bg-base: oklch(0.988 0.029 28.338);
+  /* Background: subtle — section/backdrop BG */
+  --bg-subtle: oklch(0.97 0.027 27.168);
+  /* Background: surface — card & surface white */
+  --bg-surface: oklch(1 0.031 28.875);
+
+  /* Text: primary — main readable text */
+  --text-primary: oklch(0.209 0.031 228.931);
+  /* Text: secondary — supporting text, less emphasis */
+  --text-secondary: oklch(0.447 0.021 232.05);
+  /* Text: tertiary — placeholder / helper text */
+  --text-tertiary: oklch(0.713 0.012 250.593);
+  /* Text: inverse — white for dark primary surfaces */
+  --text-inverse: oklch(1 0.031 28.875);
+
+  /* Brand primary scale (50 → 900) — use appropriate weight for UI */
+  /* Primary 50 — very light highlight */
+  --primary-50: oklch(0.955 0.005 10.627);
+  /* Primary 100 — light */
+  --primary-100: oklch(0.905 0.027 210.349);
+  /* Primary 200 — subtle */
+  --primary-200: oklch(0.832 0.078 209.08);
+  /* Primary 300 — medium accent */
+  --primary-300: oklch(0.757 0.123 209.733);
+  /* Primary 400 — strong accent */
+  --primary-400: oklch(0.688 0.137 211.568);
+  /* Primary 500 — main brand color (alias of --primary) */
+  --primary-500: oklch(0.591 0.132 213.352);
+  /* Primary 600 — hover */
+  --primary-600: oklch(0.502 0.114 213.666);
+  /* Primary 700 — active */
+  --primary-700: oklch(0.446 0.094 213.034);
+  /* Primary 800 — deep */
+  --primary-800: oklch(0.393 0.078 213.284);
+  /* Primary 900 — darkest */
+  --primary-900: oklch(0.357 0.066 214.42);
+
+  /* Success (green) — success color for toasts, badges */
+  --success: oklch(0.726 0.092 131.106);
+  /* Success background — soft success surfaces */
+  --success-bg: oklch(0.946 0.034 126.442);
+  /* Success border — thin success outlines */
+  --success-border: oklch(0.836 0.122 128.956);
+
+  /* Warning (amber/orange) — warnings, cautions */
+  --warning: oklch(0.796 0.138 47.597);
+  /* Warning background */
+  --warning-bg: oklch(0.994 0.027 67.149);
+  /* Warning border */
+  --warning-border: oklch(0.942 0.136 63.871);
+
+  /* Error (red) — errors, critical banners */
+  --error: oklch(0.637 0.205 16.556);
+  /* Error background */
+  --error-bg: oklch(0.992 0.063 15.394);
+  /* Error border */
+  --error-border: oklch(0.792 0.165 19.215);
+
+  /* Tag / badge colors */
+  /* Tag: blue (info) */
+  --tag-blue: oklch(0.591 0.132 213.352);
+  /* Tag: green (completed) */
+  --tag-green: oklch(0.726 0.092 131.106);
+  /* Tag: yellow (pending) */
+  --tag-yellow: oklch(0.796 0.138 47.597);
+  /* Tag: red (critical) */
+  --tag-red: oklch(0.637 0.205 16.556);
+  /* Tag: purple (admin) */
+  --tag-purple: oklch(0.608 0.14 246.25);
+  /* Tag: gray (neutral) */
+  --tag-gray: oklch(0.553 0.007 283.85);
+
+  /* Shadows (standard modern soft shadows) */
+  /* Shadow: xs — subtle (buttons) */
+  --shadow-xs: 0 1px 2px rgba(2, 6, 23, 0.05);
+  /* Shadow: sm — small (inputs) */
+  --shadow-sm: 0 1px 3px rgba(2, 6, 23, 0.08);
+  /* Shadow: md — medium (cards) */
+  --shadow-md: 0 4px 6px rgba(2, 6, 23, 0.1);
+  /* Shadow: lg — large (modals) */
+  --shadow-lg: 0 10px 15px rgba(2, 6, 23, 0.15);
+  /* Shadow: xl — x-large (panels) */
+  --shadow-xl: 0 20px 25px rgba(2, 6, 23, 0.2);
+
+  /* Small utility tokens (aliases) */
+  /* Border subtle alias */
+  --border-subtle: oklch(0.936 0.023 23.996);
+  /* Focus ring strong alias */
+  --focus-ring-strong: oklch(0.591 0.132 213.352 / 45%);
+
+  /* Keep any pre-existing tokens not in my palette unchanged if present in other parts (no changes here) */
+}
+
+.dark {
+  --background: oklch(
+    0.182 0.005 244.052
+  ); /* Dark mode base background — app dark BG */
+  --foreground: oklch(
+    0.971 0.023 26.236
+  ); /* Dark mode primary text — light text on dark */
+  --card: oklch(
+    0.26 0.008 241.567
+  ); /* Dark card surface — panels in dark mode */
+  --card-foreground: oklch(0.971 0.023 26.236); /* Text on dark card */
+  --popover: oklch(0.26 0.008 241.567); /* Popover background in dark */
+  --popover-foreground: oklch(0.971 0.023 26.236); /* Popover text in dark */
+
+  /* Primary in dark — slightly lighter to keep contrast on dark surfaces */
+  --primary: oklch(0.757 0.123 209.733);
+  /* Primary foreground (dark) */
+  --primary-foreground: oklch(0.182 0.005 244.052);
+
+  /* Secondary dark */
+  --secondary: oklch(0.872 0.01 5.473);
+  /* Secondary foreground dark */
+  --secondary-foreground: oklch(0.971 0.023 26.236);
+
+  /* Muted dark */
+  --muted: oklch(0.872 0.01 5.473);
+  /* Muted foreground dark */
+  --muted-foreground: oklch(0.557 0.021 234.925);
+
+  /* Accent dark */
+  --accent: oklch(0.872 0.01 5.473);
+  /* Accent foreground dark */
+  --accent-foreground: oklch(0.971 0.023 26.236);
+
+  /* Destructive (dark) — error tone adapted for dark */
+  --destructive: oklch(0.704 0.191 22.216);
+  /* Border in dark (subtle with alpha) */
+  --border: oklch(1 0 0 / 10%);
+  /* Input in dark (slightly transparent) */
+  --input: oklch(1 0 0 / 15%);
+  /* Ring in dark (soft highlight) */
+  --ring: oklch(0.591 0.132 213.352 / 30%);
+
+  /* Chart colors for dark (kept vivid for contrast) */
+  --chart-1: oklch(0.488 0.243 264.376); /* vivid accent */
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+
+  --sidebar: oklch(0.205 0 0); /* Sidebar dark BG */
+  --sidebar-foreground: oklch(0.971 0.023 26.236);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.971 0.023 26.236);
+  --sidebar-accent: oklch(0.872 0.01 5.473);
+  --sidebar-accent-foreground: oklch(0.971 0.023 26.236);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+
+  /* -------------- NEW / DETAILED TOKENS (dark mode) -------------- */
+
+  /* Background aliases for dark */
+  --bg-base-dark: oklch(0.182 0.005 244.052); /* Main dark background */
+  --bg-subtle-dark: oklch(
+    0.221 0.008 234.936
+  ); /* Slightly lighter dark sections */
+  --bg-surface-dark: oklch(0.26 0.008 241.567); /* Card / surface dark */
+
+  /* Text tokens (dark) */
+  --text-primary-dark: oklch(
+    0.971 0.023 26.236
+  ); /* Main readable text in dark */
+  --text-secondary-dark: oklch(0.872 0.01 5.473); /* Secondary text in dark */
+  --text-tertiary-dark: oklch(0.557 0.021 234.925); /* Helper text */
+  --text-inverse-dark: oklch(0 0 0); /* Black (for bright elements in dark) */
+
+  /* Brand primary scale (dark mode variants where needed) */
+  --primary-50-dark: oklch(0.955 0.005 10.627);
+  --primary-100-dark: oklch(0.905 0.027 210.349);
+  --primary-200-dark: oklch(0.832 0.078 209.08);
+  --primary-300-dark: oklch(0.757 0.123 209.733);
+  --primary-400-dark: oklch(0.688 0.137 211.568);
+  --primary-500-dark: oklch(0.591 0.132 213.352);
+
+  /* Status colors (dark variants) */
+  --success-dark: oklch(0.726 0.092 131.106);
+  --success-bg-dark: oklch(0.946 0.034 126.442);
+  --success-border-dark: oklch(0.836 0.122 128.956);
+
+  --warning-dark: oklch(0.796 0.138 47.597);
+  --warning-bg-dark: oklch(0.994 0.027 67.149);
+  --warning-border-dark: oklch(0.942 0.136 63.871);
+
+  --error-dark: oklch(0.637 0.205 16.556);
+  --error-bg-dark: oklch(0.992 0.063 15.394);
+  --error-border-dark: oklch(0.792 0.165 19.215);
+
+  /* Tag / badge dark variants */
+  --tag-blue-dark: oklch(0.591 0.132 213.352);
+  --tag-green-dark: oklch(0.726 0.092 131.106);
+  --tag-yellow-dark: oklch(0.796 0.138 47.597);
+  --tag-red-dark: oklch(0.637 0.205 16.556);
+  --tag-purple-dark: oklch(0.608 0.14 246.25);
+  --tag-gray-dark: oklch(0.553 0.007 283.85);
+
+  /* Shadows in dark (soft highlights rather than darkening) */
+  --shadow-xs-dark: 0 1px 2px rgba(255, 255, 255, 0.02);
+  --shadow-sm-dark: 0 1px 3px rgba(255, 255, 255, 0.03);
+  --shadow-md-dark: 0 4px 6px rgba(255, 255, 255, 0.04);
+  --shadow-lg-dark: 0 8px 12px rgba(255, 255, 255, 0.06);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+  }
 }

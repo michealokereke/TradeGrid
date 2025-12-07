@@ -5,7 +5,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import appRouter from "../api/router.js";
 import { errorHandler } from "../middlewares/error.middleware.js";
-import { deserializeUser } from "../../middleware/auth.middleware.js";
+import { deserializeUser } from "../middlewares/auth.middleware.js";
 
 const app = express();
 

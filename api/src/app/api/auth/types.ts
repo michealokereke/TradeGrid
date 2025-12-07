@@ -18,7 +18,9 @@ export interface AuthResponse {
     name: string;
     role: UserRole;
     tenantId: string;
+    tenantName?: string;
+    slug?: string;
   };
-  access_token: string;
-  refresh_token: string; // Optional because we might use cookies
+  access_token?: string;
+  refresh_token?: string; // Optional because we might use cookies
 }
