@@ -16,7 +16,7 @@ export const useAuthHydrator = () => {
       return;
     }
 
-    if (isSuccess && data) dispatch(setUser(data));
+    if (isSuccess && data.data) dispatch(setUser(data.data));
   }, [isLoading, isSuccess, data]);
 
   return { isLoading };
