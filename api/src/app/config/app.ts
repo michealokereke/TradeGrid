@@ -17,7 +17,7 @@ app.use(
     credentials: true,
   })
 );
-app.use(morgan("dev"));
+app.use(morgan(ENV.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
