@@ -91,9 +91,7 @@ export function JoinInviteForm() {
   return (
     <Card className="border-0 shadow-xl">
       <CardHeader className="space-y-2">
-        <CardTitle className="text-2xl font-bold">
-          Join {inviteData.companyName}
-        </CardTitle>
+        <CardTitle className="text-2xl font-bold">Join ACME Corp</CardTitle>
         <CardDescription>
           Set up your account to start receiving jobs
         </CardDescription>
@@ -104,7 +102,7 @@ export function JoinInviteForm() {
           <div className="flex items-center gap-2 p-3 bg-secondary/10 rounded-lg border border-secondary/20">
             <span className="text-sm font-medium text-foreground">Role:</span>
             <span className="px-2 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded">
-              {inviteData.role === "TECH" ? "Technician" : inviteData.role}
+              role
             </span>
           </div>
 
