@@ -21,9 +21,10 @@ import { AlertCircle, Loader2, CheckCircle2 } from "lucide-react";
 
 export function JoinInviteForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  //const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
-  const token = searchParams.get("token") || "";
+  //const token = searchParams.get("token") || "";
+  const token = "sample-invite-token";
 
   const { data: inviteData, isLoading: isVerifying } =
     useVerifyInviteQuery(token);
