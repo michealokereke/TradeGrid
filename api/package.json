@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx --watch --env-file=.env src/server.ts",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "deploy-build": "npm install --include=dev && npx prisma generate && npm run build"
   },
   "keywords": [],
   "author": "",
