@@ -5,13 +5,13 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export const useAuthHydrator = () => {
-  const { data, isLoading, isSuccess } = useGetMeQuery();
+  const { data, isLoading, isSuccess, isError } = useGetMeQuery();
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     isLoading && dispatch(setStatus("loading"));
 
-    if (isSuccess && !data) {
+    if (isError) {
       dispatch(clearAuth());
       return;
     }

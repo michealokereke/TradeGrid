@@ -46,6 +46,7 @@ export const authApi = baseApi.injectEndpoints({
         url: `/auth/verify-invite/${tkn}`,
         method: "GET",
       }),
+      providesTags: ["user"],
     }),
 
     getMe: builder.query<ApiResponse<User>, void>({
