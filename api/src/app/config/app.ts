@@ -6,13 +6,14 @@ import cookieParser from "cookie-parser";
 import appRouter from "../api/router.js";
 import { errorHandler } from "../middlewares/error.middleware.js";
 import { deserializeUser } from "../middlewares/auth.middleware.js";
+import { ENV } from "./env.js";
 
 const app = express();
 
 app.use(helmet());
 app.use(
   cors({
-    origin: "http://localhost:3000", // Frontend URL
+    origin: ENV.FRONTEND_URL, // Frontend URL
     credentials: true,
   })
 );

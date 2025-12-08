@@ -11,4 +11,5 @@ export const ENV = {
   REFRESH_TOKEN_EXPIRES_DAYS: Number(
     process.env.REFRESH_TOKEN_EXPIRES_DAYS || 7
   ),
+  FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3000",
 };

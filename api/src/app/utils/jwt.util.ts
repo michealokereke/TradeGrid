@@ -13,7 +13,7 @@ const verify = (token: string): string | JwtPayload => {
 
 export const jwtUtil = {
   signAccessToken(payload: object) {
-    return sign(payload, `${ENV.REFRESH_TOKEN_EXPIRES_DAYS || 15}d`);
+    return sign(payload, `${ENV.ACCESS_TOKEN_EXPIRES_IN || 15}d`);
   },
 
   signRefreshToken(payload: object) {
