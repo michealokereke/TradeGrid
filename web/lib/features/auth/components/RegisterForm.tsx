@@ -63,7 +63,6 @@ export function RegisterForm() {
     try {
       setSlugError(null);
       const result = await register(data).unwrap();
-      dispatch(setStatus("refresh"));
       router.push("/dashboard");
     } catch (error) {
       const err = error as ApiErrorResponse;

@@ -37,7 +37,6 @@ export function LoginForm() {
   const onSubmit = async (data: LoginInput) => {
     try {
       const result = await login(data).unwrap();
-      dispatch(setStatus("refresh"));
       router.push("/dashboard");
     } catch (error) {
       const err = error as ApiErrorResponse;

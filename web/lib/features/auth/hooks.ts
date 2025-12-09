@@ -1,23 +1,24 @@
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { useGetMeQuery } from "./authApi";
-import { clearAuth, setUser, setStatus } from "./authSlice";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export const useAuthHydrator = () => {
   const { data, isLoading, isSuccess, isError } = useGetMeQuery();
-  const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    isLoading && dispatch(setStatus("loading"));
+  // const dispatch = useAppDispatch();
 
-    if (isError) {
-      dispatch(clearAuth());
-      return;
-    }
+  // useEffect(() => {
+  //   isLoading && dispatch(setStatus("loading"));
 
-    if (isSuccess && data.data) dispatch(setUser(data.data));
-  }, [isLoading, isSuccess, data]);
+  //   if (isError) {
+  //     dispatch(clearAuth());
+  //     return;
+  //   }
+
+  //   if (isSuccess && data.data) dispatch(setUser(data.data));
+
+  // }, [isLoading, isSuccess, data]);
 
   return { isLoading };
 };

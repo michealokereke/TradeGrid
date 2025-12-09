@@ -6,6 +6,7 @@ import {
   RegisterTenantInput,
 } from "./authschema";
 import { User } from "./types";
+import { clearAuth, setStatus, setUser } from "./authSlice";
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -15,6 +16,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["user"],
     }),
 
     login: builder.mutation<ApiResponse<User>, LoginInput>({
@@ -23,6 +25,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["user"],
     }),
 
     logout: builder.mutation<ApiResponse<unknown>, void>({
@@ -54,7 +57,17 @@ export const authApi = baseApi.injectEndpoints({
         url: "/auth/me",
         method: "GET",
       }),
-
+      async onQueryStarted(queryArgument, { dispatch, queryFulfilled }) {
+        dispatch(setStatus("loading"));
+        try {
+          const { data } = await queryFulfilled;
+          if (data.data) {
+            dispatch(setUser(data.data));
+          }
+        } catch (err) {
+          dispatch(clearAuth());
+        }
+      },
       providesTags: ["user"],
     }),
   }),
